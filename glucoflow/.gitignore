@@ -7,6 +7,9 @@
 venv/
 env/
 
+#internal documents 
+docs/
+
 # Raw data — never commit patient data
 data/raw/
 data/samples/messy/*.csv
