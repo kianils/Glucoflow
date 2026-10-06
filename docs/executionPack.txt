@@ -1,0 +1,193 @@
+# Day 1 Execution Pack
+
+Two decisions locked in before the tasks:
+
+**1. AWS-native only (no IBM watsonx).** Confirmed. The AI layer will use **Amazon Bedrock**. I'll update the spec references accordingly (Section 5 AI row, Section 12 Q1/Q2 are now closed).
+
+**2. Dashboard replaced with agentic / conversational analytics.** You're right. I'm replacing the "Streamlit dashboard" (Day 6) with an **AI-driven conversational analytics layer**: a natural-language interface where a clinician asks questions ("What's patient 3's time in range this week, and should I be worried?") and a Bedrock-powered agent answers by calling your MCP tools against live data. This is **augmented/agentic analytics**, not a static dashboard. Any visuals it produces are **generated on-demand in response to the question**, not pre-built panels. This is strictly a Day 5–6 change; Day 1 is unaffected.
+
+---
+
+## Day 1 Scope Reminder
+
+| Task | Output |
+|---|---|
+| Shanghai dataset: download, inspect, confirm license | Real data in `bronze/` |
+| simglucose: 5 patients × 14 days | Synthetic data in `bronze/` |
+| Dexcom-style "messy" CSV generator | Messy exports in `bronze/` |
+| AWS: account, 4 S3 buckets, IAM | Infrastructure ready |
+
+**Done-when:** You can `aws s3 ls` and see all three source types in the bronze bucket.
+
+---
+
+## Links You Need
+
+**Data sources**
+- Shanghai T1DM/T2DM dataset (figshare): search figshare for **"Shanghai T1DM and T2DM Diabetes Datasets"** (Zhao et al., *Scientific Data*, 2023). ⚠️ I can't guarantee a live URL from here — verify the DOI and **read the license on the figshare page** before downloading. Confirm it permits presentation use.
+- Paper (for citation + schema reference): *Scientific Data* 2023, "A diabetes dataset of Chinese patients with continuous glucose monitoring" — find via the figshare record or Google Scholar.
+- Awesome-CGM repo (survey of datasets, good to cite): search GitHub for **`Awesome-CGM`**.
+
+**simglucose**
+- PyPI: `pip install simglucose`
+- GitHub: search **`jxx123/simglucose`** for the API and patient list.
+
+**AWS**
+- Console: `https://console.aws.amazon.com/`
+- AWS CLI install: `https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html`
+- S3 docs: `https://docs.aws.amazon.com/s3/`
+- IAM best practices: `https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html`
+
+**Dexcom format reference**
+- Search **"Dexcom Clarity export data interpretation"** to confirm the exact column names before finalizing the generator. The quirks to replicate: `Low`/`High` strings, mixed event-type rows, device/transmitter metadata rows.
+
+---
+
+## Prompts for Your Coder (Cursor / Copilot / Claude Code)
+
+Run these **in order**. Each is self-contained. Review output before moving on.
+
+---
+
+### Prompt 1 — Project scaffold
+
+```
+Create a Python project called "glucoflow" for an AWS-native CGM data pipeline. Set up this structure:
+
+glucoflow/
+  src/
+    ingestion/
+    generators/
+    common/
+  data/
+    raw/
+    samples/
+  infra/
+  tests/
+  requirements.txt
+  README.md
+  .gitignore
+  .env.example
+
+Requirements: use Python 3.11. Add these to requirements.txt: boto3, pandas, numpy, pydantic>=2, simglucose, python-dotenv, pytest.
+.gitignore must exclude .env, data/raw/, __pycache__, .venv, and any .csv in data/raw.
+.env.example must include: AWS_REGION, AWS_PROFILE, BRONZE_BUCKET, SILVER_BUCKET, GOLD_BUCKET, QUARANTINE_BUCKET.
+README.md: short description + setup steps (venv, pip install, aws configure).
+Create a Makefile with targets: install, test, gen-synthetic, gen-messy, upload-bronze.
+Do not write any AWS calls yet — just scaffold.
+```
+
+---
+
+### Prompt 2 — Shared schema & tracking fields
+
+```
+In src/common/schema.py, define the canonical GlucoFlow reading schema using pydantic v2.
+
+A CanonicalReading has:
+- patient_id: str
+- event_time: datetime (UTC, timezone-aware)
+- glucose_mgdl: float | None  (None if out of range / non-numeric)
+- glucose_flag: Literal["in_range","low","high","invalid","out_of_range"] 
+- source_system: Literal["shanghai","simglucose","dexcom_messy"]
+- batch_or_stream: Literal["batch","stream"]
+- ingest_time: datetime (UTC, set at ingestion)
+- lineage_id: str (uuid4)
+- raw_payload: dict  (original row, for audit)
+
+Rules:
+- Valid glucose range is 40–400 mg/dL. Outside that but numeric -> flag "out_of_range", keep value.
+- "Low" string -> glucose_mgdl=None, flag="low". "High" -> None, flag="high".
+- Non-numeric/missing -> None, flag="invalid".
+Add a factory classmethod `from_raw(cls, row: dict, source_system, batch_or_stream)` that applies these rules and auto-sets ingest_time and lineage_id.
+Write pytest tests in tests/test_schema.py covering: normal value, Low, High, out-of-range (e.g. 500), and garbage string.
+```
+
+---
+
+### Prompt 3 — simglucose synthetic generator
+
+```
+In src/generators/synthetic_gen.py, write a generator that uses the simglucose package to produce CGM data.
+
+- Generate data for 5 adult patients (use simglucose's built-in adult patient presets, e.g. adult#001 through adult#005).
+- 14 days per patient, sensor sampling every 5 minutes.
+- Include realistic sensor noise (use simglucose's default CGM sensor model, e.g. Dexcom).
+- Output one CSV per patient to data/samples/synthetic/ with columns: patient_id, timestamp (ISO8601 UTC), glucose_mgdl.
+- Also print a summary per patient: number of rows, min/max glucose, % readings in 70–180 range.
+- Make it runnable as `python -m src.generators.synthetic_gen`.
+If the simglucose simulation API differs from what you expect, read the installed package's examples and adapt. Add a short docstring citing simglucose (UVA/Padova T1DM simulator).
+```
+
+> ⚠️ simglucose's simulation API can be fiddly (it runs a controller/scenario loop). Tell your coder explicitly: *"If the full simulation loop is complex, use simglucose's CGMSensor + a basic meal scenario to produce a glucose trace — the goal is realistic 5-minute readings with sensor noise, not a perfect closed-loop sim."*
+
+---
+
+### Prompt 4 — Dexcom-style "messy" CSV generator
+
+```
+In src/generators/messy_dexcom_gen.py, write a generator that takes clean readings (reuse the synthetic CSVs from data/samples/synthetic/) and produces a "messy" Dexcom Clarity-style export to data/samples/messy/.
+
+Replicate these real-world quirks:
+1. Mixed event rows: a column "Event Type" with values like "EGV" (glucose), "Calibration", "Insulin", "Carbs". Only EGV rows have a glucose value.
+2. For EGV rows where glucose < 40, write the string "Low" instead of a number. Where > 400, write "High".
+3. Add a few metadata/header rows at the top (device, transmitter serial, export date) that are NOT part of the tabular data — simulate the real Clarity CSV preamble.
+4. Column names mimicking Clarity: "Index", "Timestamp (YYYY-MM-DDThh:mm:ss)", "Event Type", "Event Subtype", "Glucose Value (mg/dL)", "Transmitter ID".
+5. Inject ~2% duplicate rows and ~1% rows with blank glucose on an EGV row.
+
+Make it runnable as `python -m src.generators.messy_dexcom_gen`.
+Add a comment block noting these column names are approximations and must be verified against official Dexcom Clarity export docs before production use.
+```
+
+---
+
+### Prompt 5 — AWS infrastructure (buckets + IAM)
+
+```
+In infra/, create a bash script setup_aws.sh that provisions Day 1 AWS resources using the AWS CLI. It must be idempotent (safe to re-run).
+
+Create 4 S3 buckets using names from env vars BRONZE_BUCKET, SILVER_BUCKET, GOLD_BUCKET, QUARANTINE_BUCKET:
+- Enable versioning on all 4.
+- Block all public access on all 4.
+- Add a lifecycle rule on bronze to expire objects after 30 days (demo cost control).
+
+Create a least-privilege IAM policy document (infra/glucoflow-policy.json) granting s3:PutObject, s3:GetObject, s3:ListBucket ONLY on these 4 buckets.
+
+Also create infra/teardown_aws.sh that empties and deletes all 4 buckets (with a confirmation prompt).
+
+Read bucket names and region from a .env file. Print each resource as it's created. Do NOT hardcode account IDs or credentials.
+```
+
+> ⚠️ S3 bucket names are **globally unique**. Tell your coder to suffix bucket names with something unique (e.g. `glucoflow-bronze-<yourinitials>-<random>`). Set these in `.env` before running.
+
+---
+
+### Prompt 6 — Upload to bronze
+
+```
+In src/ingestion/upload_bronze.py, write a script that uploads the local sample data to the bronze S3 bucket, preserving source separation.
+
+Upload layout:
+  s3://<BRONZE_BUCKET>/shanghai/...        (from data/raw/shanghai/)
+  s3://<BRONZE_BUCKET>/simglucose/...       (from data/samples/synthetic/)
+  s3://<BRONZE_BUCKET>/dexcom_messy/...      (from data/samples/messy/)
+
+- Use boto3, read bucket name from .env.
+- Add S3 object metadata on each upload: source_system and ingest_time (UTC ISO8601).
+- Print a summary: count + total size uploaded per source prefix.
+- After upload, run a verification that lists objects under each of the 3 prefixes and asserts each has at least 1 object. Print PASS/FAIL per prefix — this is the Day 1 "done-when" check.
+Make it runnable as `python -m src.ingestion.upload_bronze`.
+```
+
+---
+
+## Day 1 Execution Order
+
+1. **Prompt 1** → scaffold, then `python -m venv .venv`, activate, `pip install -r requirements.txt`.
+2. **Download Shanghai** manually → verify license → drop into `data/raw/shanghai/`. Open a few files, note the actual column names and the 15-min interval.
+3. **Prompt 2** → schema → `pytest` must pass before continuing.
+4. **Prompt 3** → generate synthetic data → check the in-range % looks plausible (~70–90%).
+5. **Prompt 4** → generate messy data → open a file, confirm `Low`/`High` and mixed rows exist.
+6. Set unique bucket names in `.env`, run `aws configure`.
+7. **Prompt 5** → `bash infra/setup_aws.sh`.
+8. **Prompt 6** → `python -m src.ingestion.upload_bronze` → confirm

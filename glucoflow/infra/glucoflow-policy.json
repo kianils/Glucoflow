@@ -1,0 +1,35 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "GlucoFlowS3Objects",
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::BRONZE_BUCKET_PLACEHOLDER/*",
+        "arn:aws:s3:::SILVER_BUCKET_PLACEHOLDER/*",
+        "arn:aws:s3:::GOLD_BUCKET_PLACEHOLDER/*",
+        "arn:aws:s3:::QUARANTINE_BUCKET_PLACEHOLDER/*"
+      ]
+    },
+    {
+      "Sid": "GlucoFlowS3List",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketVersioning"
+      ],
+      "Resource": [
+        "arn:aws:s3:::BRONZE_BUCKET_PLACEHOLDER",
+        "arn:aws:s3:::SILVER_BUCKET_PLACEHOLDER",
+        "arn:aws:s3:::GOLD_BUCKET_PLACEHOLDER",
+        "arn:aws:s3:::QUARANTINE_BUCKET_PLACEHOLDER"
+      ]
+    }
+  ]
+}

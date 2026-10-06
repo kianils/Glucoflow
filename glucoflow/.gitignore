@@ -1,0 +1,33 @@
+# Environment & secrets
+.env
+*.env
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Raw data — never commit patient data
+data/raw/
+data/samples/messy/*.csv
+data/samples/synthetic/*.csv
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Notebooks (scratch only — no committed state)
+*.ipynb_checkpoints/
