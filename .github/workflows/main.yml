@@ -19,5 +19,11 @@ jobs:
           python-version: "3.11"
       - run: pip install -r requirements.txt
         working-directory: glucoflow
+      - name: Generate synthetic sample CSVs
+        run: python src/generators/run_simulation.py
+        working-directory: glucoflow
+      - name: Generate Dexcom messy sample CSVs
+        run: python src/generators/make_dexcom_csv.py
+        working-directory: glucoflow
       - run: pytest tests/ -v --tb=short
         working-directory: glucoflow
