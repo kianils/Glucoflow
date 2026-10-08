@@ -5,6 +5,13 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-2
+      BRONZE_BUCKET: glucoflow-bronze-ci
+      SILVER_BUCKET: glucoflow-silver-ci
+      GOLD_BUCKET: glucoflow-gold-ci
+      QUARANTINE_BUCKET: glucoflow-quarantine-ci
+      ATHENA_RESULTS_BUCKET: glucoflow-bronze-ci
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
