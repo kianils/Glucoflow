@@ -1,0 +1,43 @@
+{
+  "trial_id": "closed_loop_candidate",
+  "trial_name": "Closed-Loop / APS Candidate Screening",
+  "phase": "II",
+  "sponsor": "Modelled on Cambridge APS / JDRF INSPIRED trial",
+  "description": "Closed-loop (artificial pancreas) systems are the most advanced form of insulin delivery for T1DM. They automate basal insulin delivery based on continuous CGM readings. Pre-screening identifies T1DM patients with high glucose variability and frequent hypoglycaemia — the patients who benefit most from automated insulin management. This protocol is T1DM-only: T2DM patients rarely qualify because they retain endogenous insulin secretion that makes closed-loop dosing unpredictable.",
+  "inclusion_criteria": [
+    {
+      "field": "diabetes_type",
+      "operator": "==",
+      "threshold": null,
+      "threshold_str": "T1DM",
+      "human_label": "T1DM diagnosis required",
+      "human_rationale": "Closed-loop systems are designed for patients with absolute insulin deficiency (T1DM). The algorithm assumes all glucose excursions require exogenous insulin correction. In T2DM, residual beta-cell function and insulin resistance make closed-loop dosing algorithms unreliable and potentially dangerous. All major closed-loop trials (Cambridge HCL, JDRF INSPIRED, DCLP3) enrolled T1DM exclusively."
+    },
+    {
+      "field": "cv_percent",
+      "operator": ">=",
+      "threshold": 36.0,
+      "threshold_str": null,
+      "human_label": "CV% ≥ 36% (high glycaemic variability)",
+      "human_rationale": "A Coefficient of Variation ≥ 36% is the international consensus threshold (Battelino et al., Diabetes Care 2019) for 'high variability'. Patients above this threshold are most likely to benefit from closed-loop automation because their glucose is inherently unpredictable and difficult to manage with fixed basal rates."
+    },
+    {
+      "field": "hypo_events",
+      "operator": ">=",
+      "threshold": 3.0,
+      "threshold_str": null,
+      "human_label": "≥ 3 hypoglycaemic readings per day",
+      "human_rationale": "Frequent hypoglycaemia (< 70 mg/dL) is the key driver for closed-loop adoption. The automated system detects declining glucose trends and reduces insulin delivery proactively — preventing the next hypo. Patients with ≥ 3 hypo readings per day have documented hypoglycaemia burden."
+    },
+    {
+      "field": "tir_percent",
+      "operator": "<=",
+      "threshold": 65.0,
+      "threshold_str": null,
+      "human_label": "TIR ≤ 65%",
+      "human_rationale": "Below the ADA T1DM target of ≥ 70% TIR — indicates the patient is not meeting glycaemic goals on current open-loop therapy and is a candidate for technological intensification."
+    }
+  ],
+  "exclusion_criteria": [],
+  "notes": "v2: Added diabetes_type == T1DM inclusion criterion. Based on Hovorka R et al., Closed-loop insulin delivery in suboptimally controlled type 1 diabetes (Cambridge trial); and Bergenstal RM et al., Threshold Suspend for Prevention of Hypoglycemia (ASPIRE-In-Home trial)."
+}

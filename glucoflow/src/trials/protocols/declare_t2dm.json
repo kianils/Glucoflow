@@ -1,0 +1,61 @@
+{
+  "trial_id": "declare_t2dm",
+  "trial_name": "DECLARE-T2DM SGLT2 Inhibitor Pre-Screening Protocol",
+  "sponsor": "GlucoFlow Research Network",
+  "phase": "III",
+  "intervention": "Canagliflozin (SGLT2 inhibitor) vs Placebo",
+  "description": "Pre-screening protocol modelled on the DECLARE-TIMI 58 trial (dapagliflozin) and CANVAS Programme (canagliflozin). Targets adults with Type 2 diabetes mellitus and suboptimal glycaemic control, with established or high cardiovascular risk, excluding patients with severe nephropathy. Primary endpoint: MACE (major adverse cardiovascular events). CGM criteria reflect the HbA1c inclusion range used in the original trials (6.5%–12.0% HbA1c, expressed here as GMI equivalent).",
+  "inclusion_criteria": [
+    {
+      "field": "diabetes_type",
+      "operator": "==",
+      "threshold_str": "T2DM",
+      "human_label": "Type 2 Diabetes Mellitus required",
+      "human_rationale": "SGLT2 inhibitors are indicated for T2DM. The DECLARE-TIMI 58 and CANVAS programmes exclusively enrolled T2DM patients; T1DM patients have different glycaemic profiles and a different risk-benefit calculus for SGLT2 inhibition (DKA risk)."
+    },
+    {
+      "field": "duration_years",
+      "operator": ">=",
+      "threshold": 2.0,
+      "human_label": "Diabetes diagnosed >= 2 years ago",
+      "human_rationale": "A minimum 2-year disease duration ensures patients have established T2DM rather than newly-diagnosed cases that may respond to lifestyle alone, and is consistent with the enrolment criteria in CANVAS (established T2DM at high CV risk)."
+    },
+    {
+      "field": "gmi",
+      "operator": ">=",
+      "threshold": 7.0,
+      "human_label": "GMI >= 7.0% (suboptimal glycaemic control)",
+      "human_rationale": "DECLARE-TIMI 58 required HbA1c >= 6.5%; CANVAS required >= 7.0%. A GMI floor of 7.0% selects patients with suboptimal control who are most likely to benefit from the glucose-lowering and cardiorenal protective effects of canagliflozin."
+    },
+    {
+      "field": "gmi",
+      "operator": "<=",
+      "threshold": 10.5,
+      "human_label": "GMI <= 10.5% (not severely uncontrolled)",
+      "human_rationale": "DECLARE-TIMI 58 capped HbA1c at 12.0%; CANVAS at 10.5%. A GMI ceiling excludes severely uncontrolled patients who require intensified insulin therapy first and for whom a single SGLT2 inhibitor is unlikely to be the primary intervention. 10.5% aligns with CANVAS."
+    },
+    {
+      "field": "age",
+      "operator": ">=",
+      "threshold": 40.0,
+      "human_label": "Age >= 40 years",
+      "human_rationale": "DECLARE-TIMI 58 enrolled patients aged >= 40 years with atherosclerotic CVD risk factors, or >= 55 years with established CVD. A minimum age of 40 reflects the target population for cardiorenal protection trials."
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "field": "has_nephropathy",
+      "operator": "==",
+      "threshold": 1.0,
+      "human_label": "Severe nephropathy must be absent",
+      "human_rationale": "CANVAS and DECLARE-TIMI 58 excluded patients with eGFR < 30 mL/min/1.73m2 (severe CKD) because SGLT2 inhibitors require adequate renal function for their glucose-lowering mechanism and may worsen acute kidney injury in severely impaired kidneys. The has_nephropathy flag here proxies for clinically significant nephropathy that would contraindicate SGLT2 use."
+    },
+    {
+      "field": "severe_hypo_events",
+      "operator": ">=",
+      "threshold": 1.0,
+      "human_label": "No severe hypoglycaemic events in monitoring period",
+      "human_rationale": "Severe hypoglycaemia (requiring third-party assistance) indicates brittle glycaemic control or excessive insulin dosing that must be addressed before adding an SGLT2 inhibitor. It also raises DKA risk in combination therapy, and is a safety stopping criterion in both DECLARE-TIMI 58 and CANVAS."
+    }
+  ]
+}

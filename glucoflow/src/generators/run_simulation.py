@@ -64,13 +64,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger(__name__)
 
 # ── Configuration ───────────────────────────────────────────────────────────
-# One patient per demographic group.  Full list has 10 adolescents, 10 adults,
-# 10 children — we sample one from each group to keep synthetic files small.
-PATIENTS_TO_SIMULATE = [
-    "adolescent#001",
-    "adult#001",
-    "child#001",
-]
+# All 30 virtual patients from the UVA/Padova simulator:
+# 10 adolescents, 10 adults, 10 children.
+PATIENTS_TO_SIMULATE = (
+    [f"adolescent#{i:03d}" for i in range(1, 11)] +
+    [f"adult#{i:03d}"      for i in range(1, 11)] +
+    [f"child#{i:03d}"      for i in range(1, 11)]
+)
 
 # Simulation length: 24 hours = 1440 minutes (288 CGM readings at 5-min intervals)
 SIM_HOURS = 24

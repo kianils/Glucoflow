@@ -10,10 +10,10 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::BRONZE_BUCKET_PLACEHOLDER/*",
-        "arn:aws:s3:::SILVER_BUCKET_PLACEHOLDER/*",
-        "arn:aws:s3:::GOLD_BUCKET_PLACEHOLDER/*",
-        "arn:aws:s3:::QUARANTINE_BUCKET_PLACEHOLDER/*"
+        "arn:aws:s3:::glucoflow-bronze-lk-1/*",
+        "arn:aws:s3:::glucoflow-silver-lk-2/*",
+        "arn:aws:s3:::glucoflow-gold-lk-3/*",
+        "arn:aws:s3:::glucoflow-quarantine-lk-4/*"
       ]
     },
     {
@@ -25,10 +25,10 @@
         "s3:GetBucketVersioning"
       ],
       "Resource": [
-        "arn:aws:s3:::BRONZE_BUCKET_PLACEHOLDER",
-        "arn:aws:s3:::SILVER_BUCKET_PLACEHOLDER",
-        "arn:aws:s3:::GOLD_BUCKET_PLACEHOLDER",
-        "arn:aws:s3:::QUARANTINE_BUCKET_PLACEHOLDER"
+        "arn:aws:s3:::glucoflow-bronze-lk-1",
+        "arn:aws:s3:::glucoflow-silver-lk-2",
+        "arn:aws:s3:::glucoflow-gold-lk-3",
+        "arn:aws:s3:::glucoflow-quarantine-lk-4"
       ]
     },
     {

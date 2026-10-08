@@ -34,7 +34,7 @@ done
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  ⚠️   GlucoFlow — AWS Teardown (DESTRUCTIVE)                 ║"
+echo "║     GlucoFlow — AWS Teardown (DESTRUCTIVE)                 ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "  This will PERMANENTLY DELETE:"

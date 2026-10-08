@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
+#define the config class 
 @dataclass
 class Config:
     aws_region: str
@@ -18,8 +18,9 @@ class Config:
     silver_bucket: str
     gold_bucket: str
     quarantine_bucket: str
+    athena_results_bucket: str  # bucket where Athena writes temp query results
 
-
+#initialization method
 def load_config() -> Config:
     missing = []
     keys = ["AWS_REGION", "BRONZE_BUCKET", "SILVER_BUCKET", "GOLD_BUCKET", "QUARANTINE_BUCKET"]
@@ -31,12 +32,17 @@ def load_config() -> Config:
             f"Missing required environment variables: {', '.join(missing)}\n"
             "Copy .env.example to .env and fill in your values."
         )
+    # ATHENA_RESULTS_BUCKET is optional — falls back to bronze bucket.
+    # Athena must write its temp CSV results somewhere; bronze is always
+    # guaranteed to exist so this avoids needing a 5th bucket.
+    athena_results = os.getenv("ATHENA_RESULTS_BUCKET") or os.environ["BRONZE_BUCKET"]
     return Config(
         aws_region=os.environ["AWS_REGION"],
         bronze_bucket=os.environ["BRONZE_BUCKET"],
         silver_bucket=os.environ["SILVER_BUCKET"],
         gold_bucket=os.environ["GOLD_BUCKET"],
         quarantine_bucket=os.environ["QUARANTINE_BUCKET"],
+        athena_results_bucket=athena_results,
     )
 
 

@@ -1,0 +1,61 @@
+{
+  "trial_id": "sensor_augmented_pump",
+  "trial_name": "Sensor-Augmented Pump Therapy for High-Variability T1DM",
+  "sponsor": "GlucoFlow Research Network",
+  "phase": "III",
+  "intervention": "Sensor-Augmented Insulin Pump (SAP) vs Multiple Daily Injections (MDI) + CGM",
+  "description": "Pre-screening protocol modelled on real-world SAP trial designs (STAR 3, SAPiflex, SWITCH studies). Targets adults with Type 1 diabetes mellitus experiencing high glycaemic variability on MDI therapy, as measured by CGM coefficient of variation >= 36%. The 36% CV threshold reflects the AGC consensus definition of high variability (Danne et al., 2017, Diabetes Care). Primary endpoint: reduction in CV% and hypo burden at 26 weeks. Excludes patients already using pump therapy or closed-loop systems.",
+  "inclusion_criteria": [
+    {
+      "field": "diabetes_type",
+      "operator": "==",
+      "threshold_str": "T1DM",
+      "human_label": "Type 1 Diabetes Mellitus required",
+      "human_rationale": "SAP therapy addresses the erratic insulin kinetics and high CV% characteristic of T1DM. T2DM patients generally have residual beta-cell function and lower variability; including them would dilute the primary endpoint and blur the insulin-physiology mechanism being studied."
+    },
+    {
+      "field": "age",
+      "operator": ">=",
+      "threshold": 18.0,
+      "human_label": "Age >= 18 years (adult population)",
+      "human_rationale": "This protocol is designed for adults. Paediatric SAP use involves different device hardware, caregiver involvement, and regulatory pathways. STAR 3 and similar adult T1DM SAP trials enrolled from age 18."
+    },
+    {
+      "field": "age",
+      "operator": "<=",
+      "threshold": 65.0,
+      "human_label": "Age <= 65 years",
+      "human_rationale": "Older patients (> 65) may have comorbidities, cognitive factors, or hypoglycaemia unawareness patterns that require separate safety monitoring frameworks. The upper age bound keeps the population homogeneous for the primary CV% endpoint."
+    },
+    {
+      "field": "duration_years",
+      "operator": ">=",
+      "threshold": 1.0,
+      "human_label": "Diabetes diagnosed >= 1 year ago",
+      "human_rationale": "A minimum 1-year duration ensures the C-peptide honeymoon period is over and the patient has established T1DM physiology with absolute insulin dependence. This confirms the biological rationale for SAP therapy."
+    },
+    {
+      "field": "cv_percent",
+      "operator": ">=",
+      "threshold": 36.0,
+      "human_label": "CGM Coefficient of Variation >= 36% (high glycaemic variability)",
+      "human_rationale": "CV >= 36% is the AGC/ATTD consensus threshold for 'high variability' (Danne et al., Diabetes Care 2017). Patients below this threshold do not have sufficient variability to demonstrate a meaningful treatment effect from SAP, and would not qualify as having the target phenotype the trial is designed to treat."
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "field": "severe_hypo_events",
+      "operator": ">=",
+      "threshold": 3.0,
+      "human_label": "Fewer than 3 severe hypoglycaemic events in monitoring period",
+      "human_rationale": "Three or more severe hypoglycaemic events suggests hypoglycaemia unawareness that requires immediate clinical intervention (structured hypoglycaemia education, sensor alarm optimisation) before device escalation. Such patients need individualised rather than protocol-driven care."
+    },
+    {
+      "field": "tir_percent",
+      "operator": ">=",
+      "threshold": 70.0,
+      "human_label": "TIR < 70% required (not already well-controlled)",
+      "human_rationale": "Patients already achieving TIR >= 70% on MDI are meeting the AGC glycaemic target and would not demonstrate room-for-improvement on the primary endpoint. Enrolling them dilutes the effect size and may expose them to unnecessary device burden without expected benefit."
+    }
+  ]
+}

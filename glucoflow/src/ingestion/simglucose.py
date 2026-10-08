@@ -28,14 +28,14 @@ from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.common.schema import CgmReading
+from src.common.schema import CanonicalReading
 from src.common.s3_utils import get_s3_client, build_key, upload_jsonl
 from src.common.config import cfg
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-INPUT_DIR = Path(__file__).resolve().parents[3] / "data" / "samples" / "synthetic"
+INPUT_DIR = Path(__file__).resolve().parents[2] / "data" / "samples" / "synthetic"
 SIM_START = datetime(2023, 1, 1, 0, 0, 0)
 INTERVAL_MINUTES = 5
 
@@ -51,31 +51,30 @@ def find_column(df: pd.DataFrame, aliases: list[str]) -> str | None:
     return None
 
 
-def parse_simglucose_csv(csv_path: Path) -> tuple[list[CgmReading], list[dict]]:
+def parse_simglucose_csv(csv_path: Path) -> tuple[list[CanonicalReading], list[dict]]:
     df = pd.read_csv(csv_path)
     patient_id = csv_path.stem  # e.g. "adult_001"
 
     cgm_col = find_column(df, ["CGM", "cbg", "BG"])
-    insulin_col = find_column(df, ["insulin", "Insulin"])
-    carbs_col = find_column(df, ["CHO", "carbs", "Carbs"])
 
     if cgm_col is None:
         logger.error(f"Cannot find glucose column in {csv_path.name}. Columns: {list(df.columns)}")
         return [], []
 
-    valid: list[CgmReading] = []
+    valid: list[CanonicalReading] = []
     failed: list[dict] = []
 
     for i, row in df.iterrows():
         ts = SIM_START + timedelta(minutes=INTERVAL_MINUTES * i)
+        row_dict = row.to_dict()
         try:
-            reading = CgmReading(
+            reading = CanonicalReading.from_raw(
+                row_dict,
                 patient_id=f"sim_{patient_id}",
-                source="simglucose",
-                timestamp=ts,
-                glucose_mgdl=row[cgm_col],
-                insulin_units=float(row[insulin_col]) if insulin_col and pd.notna(row[insulin_col]) else None,
-                carbs_grams=float(row[carbs_col]) if carbs_col and pd.notna(row[carbs_col]) else None,
+                event_time=ts,
+                source_system="simglucose",
+                batch_or_stream="batch",
+                glucose_raw=row[cgm_col],
             )
             valid.append(reading)
         except (ValidationError, ValueError, TypeError) as e:

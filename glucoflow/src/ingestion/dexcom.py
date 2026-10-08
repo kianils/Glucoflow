@@ -12,11 +12,11 @@ This parser deliberately handles every known quirk of the Dexcom Clarity format:
      for this project; the others are preserved in the raw Bronze upload.
 
   3. LOW/HIGH STRINGS: Values below 40 mg/dL are written as "Low"; above 400 as "High".
-     The CgmReading schema validator handles conversion (Low → 39.0, High → 401.0).
+     The CanonicalReading schema validator handles conversion (Low → 39.0, High → 401.0).
 
   4. TRANSMITTER ID: Included in output for device provenance tracking.
 
-  5. CALIBRATION FLAG: Calibration rows set is_calibration=True on the CgmReading.
+  5. CALIBRATION FLAG: Calibration rows set is_calibration=True in raw_payload.
 
 All rows (EGV + Calibration) that pass schema validation go to Bronze.
 Other event types (insulin, food) are dropped at Bronze stage — the pipeline
@@ -33,14 +33,14 @@ from pydantic import ValidationError
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.common.schema import CgmReading
+from src.common.schema import CanonicalReading
 from src.common.s3_utils import get_s3_client, build_key, upload_jsonl
 from src.common.config import cfg
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
-INPUT_DIR = Path(__file__).resolve().parents[3] / "data" / "samples" / "messy"
+INPUT_DIR = Path(__file__).resolve().parents[2] / "data" / "samples" / "messy"
 
 GLUCOSE_EVENTS = {"EGV", "egv", "Calibration", "calibration"}
 TIMESTAMP_COL = "Timestamp (YYYY-MM-DDThh:mm:ss)"
@@ -50,7 +50,7 @@ INSULIN_COL = "Insulin Value (u)"
 CARBS_COL = "Carb Value (grams)"
 
 
-def parse_dexcom_export(csv_path: Path) -> tuple[list[CgmReading], list[dict], list[dict]]:
+def parse_dexcom_export(csv_path: Path) -> tuple[list[CanonicalReading], list[dict], list[dict]]:
     """
     Parse a Dexcom Clarity CSV export.
     Returns (valid_readings, failed_rows, skipped_event_rows)
@@ -68,7 +68,7 @@ def parse_dexcom_export(csv_path: Path) -> tuple[list[CgmReading], list[dict], l
 
     patient_id = csv_path.stem.replace("_dexcom_export", "")
 
-    valid: list[CgmReading] = []
+    valid: list[CanonicalReading] = []
     failed: list[dict] = []
     skipped: list[dict] = []
 
@@ -90,14 +90,25 @@ def parse_dexcom_export(csv_path: Path) -> tuple[list[CgmReading], list[dict], l
             # Parse ISO 8601 timestamp
             ts = datetime.fromisoformat(raw_ts)
 
-            reading = CgmReading(
+            # Build raw payload with all fields for traceability
+            row_dict = row.to_dict()
+            row_dict["is_calibration"] = is_calibration
+            if INSULIN_COL in df.columns:
+                ins_val = str(row.get(INSULIN_COL, "")).strip()
+                if ins_val not in ("nan", "", "None"):
+                    row_dict["insulin_units"] = float(ins_val)
+            if CARBS_COL in df.columns:
+                carb_val = str(row.get(CARBS_COL, "")).strip()
+                if carb_val not in ("nan", "", "None"):
+                    row_dict["carbs_grams"] = float(carb_val)
+
+            reading = CanonicalReading.from_raw(
+                row_dict,
                 patient_id=f"dexcom_{patient_id}",
-                source="dexcom_csv",
-                timestamp=ts,
-                glucose_mgdl=raw_gluc,  # schema validator handles "Low"/"High"
-                is_calibration=is_calibration,
-                insulin_units=float(row[INSULIN_COL]) if INSULIN_COL in df.columns and str(row.get(INSULIN_COL, "nan")).strip() not in ("nan", "") else None,
-                carbs_grams=float(row[CARBS_COL]) if CARBS_COL in df.columns and str(row.get(CARBS_COL, "nan")).strip() not in ("nan", "") else None,
+                event_time=ts,
+                source_system="dexcom_messy",
+                batch_or_stream="batch",
+                glucose_raw=raw_gluc,
             )
             valid.append(reading)
 
@@ -108,7 +119,7 @@ def parse_dexcom_export(csv_path: Path) -> tuple[list[CgmReading], list[dict], l
 
 
 def main():
-    csv_files = sorted(INPUT_DIR.glob("*_dexcom_export.csv"))
+    csv_files = sorted(INPUT_DIR.glob("dexcom_*.csv"))
     if not csv_files:
         logger.error(f"No Dexcom export CSVs found in {INPUT_DIR}.")
         logger.error("Run 'make make-dexcom' first.")
@@ -122,7 +133,7 @@ def main():
         logger.info(f"  EGV/Calibration valid: {len(valid)}, failed: {len(failed)}, other events skipped: {len(skipped)}")
         if valid:
             patient_id = csv_path.stem.replace("_dexcom_export", "")
-            key = build_key("dexcom_csv", f"{patient_id}.jsonl")
+            key = build_key("dexcom_messy", f"{patient_id}.jsonl")
             upload_jsonl(s3, [r.model_dump(mode="json") for r in valid], cfg.bronze_bucket, key)
             logger.info(f"  ✅ {len(valid)} rows → s3://{cfg.bronze_bucket}/{key}")
 

@@ -26,8 +26,9 @@ class TestPolicyJson:
     def test_policy_version(self):
         assert self.policy["Version"] == "2012-10-17"
 
-    def test_has_two_statements(self):
-        assert len(self.policy["Statement"]) == 2
+    def test_has_four_statements(self):
+        # Prompt 7 added Athena + Glue statements alongside the two S3 statements
+        assert len(self.policy["Statement"]) == 4
 
     def test_objects_statement_actions(self):
         stmt = next(s for s in self.policy["Statement"] if s["Sid"] == "GlucoFlowS3Objects")
@@ -67,6 +68,22 @@ class TestPolicyJson:
         for ph in placeholders:
             assert ph in raw, f"Missing placeholder {ph} in policy template"
 
+    def test_athena_statement_actions(self):
+        stmt = next(s for s in self.policy["Statement"] if s["Sid"] == "GlucoFlowAthena")
+        allowed = set(stmt["Action"])
+        assert "athena:StartQueryExecution" in allowed
+        assert "athena:GetQueryExecution" in allowed
+        assert "athena:GetQueryResults" in allowed
+
+    def test_glue_statement_actions(self):
+        stmt = next(s for s in self.policy["Statement"] if s["Sid"] == "GlucoFlowGlue")
+        allowed = set(stmt["Action"])
+        assert "glue:CreateDatabase" in allowed
+        assert "glue:GetDatabase" in allowed
+        assert "glue:CreateTable" in allowed
+        assert "glue:GetTable" in allowed
+        assert "glue:UpdateTable" in allowed
+
     def test_effect_is_allow(self):
         for stmt in self.policy["Statement"]:
             assert stmt["Effect"] == "Allow"
@@ -81,18 +98,18 @@ class TestBashScripts:
 
     def test_setup_script_has_set_e(self):
         """set -euo pipefail ensures the script exits on first error."""
-        content = (INFRA / "setup_aws.sh").read_text()
+        content = (INFRA / "setup_aws.sh").read_text(encoding="utf-8")
         assert "set -euo pipefail" in content
 
     def test_teardown_has_confirmation_prompt(self):
         """Teardown must require explicit YES confirmation before destroying anything."""
-        content = (INFRA / "teardown_aws.sh").read_text()
+        content = (INFRA / "teardown_aws.sh").read_text(encoding="utf-8")
         assert "YES" in content
         assert "read" in content
 
     def test_setup_handles_us_east_1_special_case(self):
         """us-east-1 must NOT send a LocationConstraint — special case in AWS API."""
-        content = (INFRA / "setup_aws.sh").read_text()
+        content = (INFRA / "setup_aws.sh").read_text(encoding="utf-8")
         assert "us-east-1" in content
         assert "LocationConstraint" in content
 

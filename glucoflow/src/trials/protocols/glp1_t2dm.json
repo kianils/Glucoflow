@@ -1,0 +1,60 @@
+{
+  "trial_id": "glp1_t2dm",
+  "trial_name": "GLP-1 Agonist CGM-Guided T2DM Trial",
+  "phase": "III",
+  "sponsor": "Modelled on SUSTAIN-6 / PIONEER-6 (Novo Nordisk)",
+  "description": "GLP-1 receptor agonist trials (semaglutide, liraglutide) target T2DM patients with suboptimal glycaemic control despite existing therapy. CGM-based pre-screening identifies candidates with elevated mean glucose and suboptimal TIR who are most likely to respond to GLP-1 intensification. This protocol is T2DM specific — T1DM patients should be screened against the DIAMOND or closed-loop protocol.",
+  "inclusion_criteria": [
+    {
+      "field": "diabetes_type",
+      "operator": "==",
+      "threshold": null,
+      "threshold_str": "T2DM",
+      "human_label": "T2DM diagnosis required",
+      "human_rationale": "GLP-1 receptor agonists work via mechanisms specific to T2DM — they stimulate endogenous insulin secretion (beta-cell dependent) and suppress glucagon. These mechanisms are absent in T1DM where beta cells are destroyed. Enrolling T1DM patients would expose them to ineffective therapy and confound the trial results."
+    },
+    {
+      "field": "gmi",
+      "operator": ">=",
+      "threshold": 7.5,
+      "threshold_str": null,
+      "human_label": "GMI ≥ 7.5%",
+      "human_rationale": "SUSTAIN-6 and PIONEER-6 enrolled patients with HbA1c ≥ 7.0–7.5%. Patients below this threshold have adequate control and are not candidates for intensification."
+    },
+    {
+      "field": "gmi",
+      "operator": "<=",
+      "threshold": 10.5,
+      "threshold_str": null,
+      "human_label": "GMI ≤ 10.5%",
+      "human_rationale": "Patients with very high GMI (> 10.5%) often have severe insulin deficiency, active infections, or acute complications that must be managed before trial participation."
+    },
+    {
+      "field": "tir_percent",
+      "operator": "<=",
+      "threshold": 70.0,
+      "threshold_str": null,
+      "human_label": "TIR ≤ 70%",
+      "human_rationale": "Identifies patients with suboptimal control — the target population for GLP-1 intensification. Well-controlled patients (TIR > 70%) are not appropriate candidates."
+    },
+    {
+      "field": "mean_glucose",
+      "operator": ">=",
+      "threshold": 154.0,
+      "threshold_str": null,
+      "human_label": "Mean glucose ≥ 154 mg/dL (8.6 mmol/L)",
+      "human_rationale": "154 mg/dL corresponds approximately to HbA1c 7.0% (the ADA intervention threshold). Reinforces GMI criterion with a direct glucose measure — both must be met."
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "field": "severe_hypo_events",
+      "operator": ">",
+      "threshold": 2.0,
+      "threshold_str": null,
+      "human_label": "Severe hypoglycaemia events > 2",
+      "human_rationale": "T2DM patients on GLP-1 therapy have low hypoglycaemia risk when not on concurrent sulphonylureas or insulin. If a T2DM patient already has > 2 severe hypo events, they likely have complicating factors (advanced nephropathy, concurrent insulin) that require careful review before adding GLP-1 therapy."
+    }
+  ],
+  "notes": "v2: Added diabetes_type == T2DM inclusion criterion. Based on Marso SP et al., Semaglutide and Cardiovascular Outcomes in Patients with Type 2 Diabetes (SUSTAIN-6), NEJM 2016; and Husain M et al., Oral Semaglutide and Cardiovascular Outcomes in Patients with Type 2 Diabetes (PIONEER-6), NEJM 2019."
+}

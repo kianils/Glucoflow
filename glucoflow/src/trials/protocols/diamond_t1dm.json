@@ -1,0 +1,52 @@
+{
+  "trial_id": "diamond_t1dm",
+  "trial_name": "DIAMOND CGM Trial — T1DM Cohort",
+  "phase": "III",
+  "sponsor": "Dexcom / Beck et al. (JAMA 2017)",
+  "description": "The DIAMOND trial (DIaMonD) tested whether continuous glucose monitoring improves HbA1c in adults with T1DM on multiple daily injections. The original trial enrolled adults with HbA1c ≥ 7.5%. CGM-based pre-screening identifies patients with suboptimal glucose control who are most likely to benefit. This protocol targets T1DM patients specifically — T2DM patients should be screened against the GLP-1 T2DM protocol instead.",
+  "inclusion_criteria": [
+    {
+      "field": "diabetes_type",
+      "operator": "==",
+      "threshold": null,
+      "threshold_str": "T1DM",
+      "human_label": "T1DM diagnosis required",
+      "human_rationale": "The DIAMOND trial was specifically designed for T1DM patients on multiple daily injections. T2DM patients have different pathophysiology and respond differently to CGM intervention — they are excluded by design to ensure the study population is homogeneous."
+    },
+    {
+      "field": "gmi",
+      "operator": ">=",
+      "threshold": 7.5,
+      "threshold_str": null,
+      "human_label": "GMI ≥ 7.5% (estimated HbA1c)",
+      "human_rationale": "The DIAMOND trial required HbA1c ≥ 7.5% at enrolment. GMI (computed from mean CGM glucose) is the CGM-native equivalent. Patients below this threshold are already well-controlled and less likely to show meaningful improvement from CGM therapy."
+    },
+    {
+      "field": "gmi",
+      "operator": "<=",
+      "threshold": 10.0,
+      "threshold_str": null,
+      "human_label": "GMI ≤ 10.0%",
+      "human_rationale": "Patients with GMI above 10% (estimated HbA1c > 10%) may have acute complications or non-compliance issues requiring medical stabilisation before trial enrolment. An upper cap is standard across CGM trials."
+    },
+    {
+      "field": "tir_percent",
+      "operator": "<=",
+      "threshold": 70.0,
+      "threshold_str": null,
+      "human_label": "TIR ≤ 70% (suboptimal glucose control)",
+      "human_rationale": "ADA 2024 defines ≥ 70% TIR as adequate control for T1DM. Patients already achieving ≥ 70% TIR are not the target population for a CGM intervention study — the trial recruits patients who stand to benefit most."
+    }
+  ],
+  "exclusion_criteria": [
+    {
+      "field": "severe_hypo_events",
+      "operator": ">",
+      "threshold": 1.0,
+      "threshold_str": null,
+      "human_label": "Severe hypoglycaemia events > 1",
+      "human_rationale": "More than one severe hypoglycaemic event (< 54 mg/dL) in the monitoring period indicates a high-risk safety profile. These patients require immediate clinical review rather than trial enrolment. This mirrors the DIAMOND trial's safety exclusion criteria."
+    }
+  ],
+  "notes": "v2: Added diabetes_type == T1DM inclusion criterion. Based on Beck RW et al., Effect of Continuous Glucose Monitoring on Glycemic Control in Adults With Type 1 Diabetes Using Insulin Injections, JAMA 2017;317(4):371–378."
+}
